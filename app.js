@@ -7,8 +7,6 @@
     CURRENCY: 'PEN',
     LOCALE: 'es-PE',
     STORAGE: Object.freeze({
-      users: 'malako_users',
-      session: 'malako_session',
       cart: 'malako_cart'
     })
   });
@@ -84,28 +82,13 @@
       }
     }
 
-    function hashPassword(password) {
-      const input = 'malako::' + String(password);
-      let hash = 5381;
-      for (let index = 0; index < input.length; index += 1) {
-        hash = ((hash << 5) + hash + input.charCodeAt(index)) >>> 0;
-      }
-      return 'h' + hash.toString(16).padStart(8, '0');
-    }
-
-    function orderCode() {
-      return 'MK-' + Date.now().toString(36).toUpperCase().slice(-6);
-    }
-
     return {
       money: money,
       escapeHTML: escapeHTML,
       normalize: normalize,
       debounce: debounce,
       readJSON: readJSON,
-      writeJSON: writeJSON,
-      hashPassword: hashPassword,
-      orderCode: orderCode
+      writeJSON: writeJSON
     };
   })();
 
@@ -130,97 +113,6 @@
     }
 
     return { all: all, byId: byId, categories: categories };
-  })();
-
-  const Auth = (function () {
-    let current = Utils.readJSON(CONFIG.STORAGE.session, null);
-
-    function getUsers() {
-      const list = Utils.readJSON(CONFIG.STORAGE.users, []);
-      return Array.isArray(list) ? list : [];
-    }
-
-    function currentUser() {
-      return current && current.email ? current : null;
-    }
-
-    function toSession(user) {
-      return { id: user.id, nombre: user.nombre, email: user.email };
-    }
-
-    function register(data) {
-      const nombre = String(data.nombre || '').trim();
-      const email = String(data.email || '').trim().toLowerCase();
-      const password = String(data.password || '');
-      const confirm = String(data.confirm || '');
-
-      if (nombre.length < 3) {
-        return { ok: false, error: 'Escribe tu nombre completo (mínimo 3 caracteres).' };
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        return { ok: false, error: 'Ingresa un correo electrónico válido.' };
-      }
-      if (password.length < 6) {
-        return { ok: false, error: 'La contraseña debe tener al menos 6 caracteres.' };
-      }
-      if (password !== confirm) {
-        return { ok: false, error: 'Las contraseñas no coinciden.' };
-      }
-
-      const users = getUsers();
-      if (users.some(function (user) { return user.email === email; })) {
-        return { ok: false, error: 'Ya existe una cuenta con ese correo electrónico.' };
-      }
-
-      const user = {
-        id: 'u-' + Date.now().toString(36),
-        nombre: nombre,
-        email: email,
-        password: Utils.hashPassword(password),
-        creadoEn: new Date().toISOString()
-      };
-
-      users.push(user);
-      if (!Utils.writeJSON(CONFIG.STORAGE.users, users)) {
-        return { ok: false, error: 'No se pudo guardar la cuenta en este navegador.' };
-      }
-
-      current = toSession(user);
-      Utils.writeJSON(CONFIG.STORAGE.session, current);
-      return { ok: true, user: current };
-    }
-
-    function login(emailInput, passwordInput) {
-      const email = String(emailInput || '').trim().toLowerCase();
-      const password = String(passwordInput || '');
-
-      if (!email || !password) {
-        return { ok: false, error: 'Completa tu correo y contraseña.' };
-      }
-
-      const user = getUsers().find(function (item) {
-        return item.email === email;
-      });
-
-      if (!user || user.password !== Utils.hashPassword(password)) {
-        return { ok: false, error: 'Correo o contraseña incorrectos.' };
-      }
-
-      current = toSession(user);
-      Utils.writeJSON(CONFIG.STORAGE.session, current);
-      return { ok: true, user: current };
-    }
-
-    function logout() {
-      current = null;
-      try {
-        window.localStorage.removeItem(CONFIG.STORAGE.session);
-      } catch (error) {
-        current = null;
-      }
-    }
-
-    return { currentUser: currentUser, register: register, login: login, logout: logout };
   })();
 
   const Cart = (function () {
@@ -358,13 +250,28 @@
     }
 
     function buildMessage(customer, detail) {
-      const code = Utils.orderCode();
+      if (!global.MalakoOrderId) {
+        return { ok: false, error: 'No se pudo cargar el generador del ID de compra.' };
+      }
+
+      const order = global.MalakoOrderId.build({
+        nombre: customer.nombre,
+        telefono: customer.telefono,
+        monto: detail.subtotal,
+        fecha: new Date()
+      });
+
+      if (!order.ok) {
+        return { ok: false, error: order.error };
+      }
+
       const lines = detail.lines.map(function (line, index) {
         return (index + 1) + '. ' + line.product.nombre + ' x' + line.qty + ' — ' + Utils.money(line.lineTotal);
       });
 
       const parts = [
-        'Hola ' + CONFIG.STORE_NAME + ', quiero confirmar mi pedido ' + code + '.',
+        'Hola ' + CONFIG.STORE_NAME + ', quiero confirmar mi pedido ' + order.id + '.',
+        '*Fecha:* ' + order.display + ' (America/Lima)',
         '',
         '*Productos*',
         lines.join('\n'),
@@ -383,7 +290,7 @@
       parts.push('', 'Quedo atento/a para coordinar el pago y la entrega.');
 
       const text = parts.join('\n');
-      return { code: code, text: text, url: buildUrl(text) };
+      return { ok: true, code: order.id, display: order.display, text: text, url: buildUrl(text) };
     }
 
     function launch(url) {
@@ -411,13 +318,6 @@
     const ELEMENT_IDS = {
       searchForm: 'search-form',
       searchInput: 'search-input',
-      userArea: 'user-area',
-      userBtn: 'user-btn',
-      userLabel: 'user-label',
-      userMenu: 'user-menu',
-      userMenuName: 'user-menu-name',
-      userMenuEmail: 'user-menu-email',
-      logoutBtn: 'logout-btn',
       cartBtn: 'cart-btn',
       cartCount: 'cart-count',
       filters: 'category-filters',
@@ -434,20 +334,6 @@
       cartEmptyCta: 'cart-empty-cta',
       cartSubtotal: 'cart-subtotal',
       cartCheckout: 'cart-checkout',
-      authModal: 'auth-modal',
-      authClose: 'auth-close',
-      loginPanel: 'login-panel',
-      registerPanel: 'register-panel',
-      loginForm: 'login-form',
-      loginEmail: 'login-email',
-      loginPassword: 'login-password',
-      loginMessage: 'login-message',
-      registerForm: 'register-form',
-      regName: 'reg-name',
-      regEmail: 'reg-email',
-      regPassword: 'reg-password',
-      regPassword2: 'reg-password2',
-      regMessage: 'reg-message',
       checkoutModal: 'checkout-modal',
       checkoutClose: 'checkout-close',
       checkoutForm: 'checkout-form',
@@ -485,16 +371,13 @@
       bindFilters();
       bindCatalogActions();
       bindCart();
-      bindAuth();
       bindCheckout();
       bindDialogs();
-      bindUserMenu();
       bindImageFallbacks(document);
       renderFilters();
       renderCatalog();
       renderCart(Cart.detail());
       Cart.subscribe(renderCart);
-      updateUser();
       els.coNombre.setAttribute('data-autofocus', '');
       els.currentYear.textContent = String(new Date().getFullYear());
     }
@@ -588,9 +471,6 @@
       els.cartOverlay.addEventListener('click', function () {
         closeDialog(els.cartDrawer);
       });
-      els.authClose.addEventListener('click', function () {
-        closeDialog(els.authModal);
-      });
       els.checkoutClose.addEventListener('click', function () {
         closeDialog(els.checkoutModal);
       });
@@ -598,7 +478,7 @@
         closeDialog(els.waModal);
       });
 
-      [els.authModal, els.checkoutModal, els.waModal].forEach(function (modal) {
+      [els.checkoutModal, els.waModal].forEach(function (modal) {
         modal.addEventListener('click', function (event) {
           if (event.target === modal) closeDialog(modal);
         });
@@ -608,10 +488,7 @@
         const openDialogs = Array.from(document.querySelectorAll('.modal.is-open, .drawer.is-open'));
         const active = openDialogs[openDialogs.length - 1];
 
-        if (!active) {
-          if (event.key === 'Escape' && !els.userMenu.hidden) closeUserMenu();
-          return;
-        }
+        if (!active) return;
 
         if (event.key === 'Escape') {
           event.preventDefault();
@@ -635,48 +512,6 @@
           first.focus();
         }
       });
-    }
-
-    function bindUserMenu() {
-      els.userBtn.addEventListener('click', function (event) {
-        event.stopPropagation();
-        if (Auth.currentUser()) toggleUserMenu();
-        else openDialog(els.authModal);
-      });
-
-      els.logoutBtn.addEventListener('click', function () {
-        Auth.logout();
-        updateUser();
-        closeUserMenu();
-        els.coNombre.value = '';
-        toast('Sesión cerrada.', 'success');
-      });
-
-      document.addEventListener('click', function (event) {
-        if (!event.target.closest('#user-area')) closeUserMenu();
-      });
-    }
-
-    function toggleUserMenu() {
-      const willOpen = els.userMenu.hidden;
-      els.userMenu.hidden = !willOpen;
-      els.userBtn.setAttribute('aria-expanded', String(willOpen));
-    }
-
-    function closeUserMenu() {
-      els.userMenu.hidden = true;
-      els.userBtn.setAttribute('aria-expanded', 'false');
-    }
-
-    function updateUser() {
-      const user = Auth.currentUser();
-      els.userLabel.textContent = user ? user.nombre.split(/\s+/)[0] : 'Ingresar';
-      els.userBtn.setAttribute('aria-label', user ? 'Abrir menú de cuenta de ' + user.nombre : 'Iniciar sesión o registrarse');
-      els.userBtn.classList.toggle('is-logged', Boolean(user));
-      els.userMenuName.textContent = user ? user.nombre : '';
-      els.userMenuEmail.textContent = user ? user.email : '';
-      els.logoutBtn.hidden = !user;
-      if (!user) closeUserMenu();
     }
 
     function bindSearch() {
@@ -906,67 +741,6 @@
       ].join('');
     }
 
-    function bindAuth() {
-      document.querySelectorAll('[data-auth-tab]').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-          switchAuthTab(tab.dataset.authTab);
-        });
-      });
-
-      els.loginForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const result = Auth.login(els.loginEmail.value, els.loginPassword.value);
-        if (!result.ok) {
-          setFormMessage(els.loginMessage, result.error);
-          return;
-        }
-        els.loginForm.reset();
-        setFormMessage(els.loginMessage, '');
-        updateUser();
-        closeDialog(els.authModal);
-        toast('Bienvenido/a, ' + result.user.nombre + '.', 'success');
-      });
-
-      els.registerForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const result = Auth.register({
-          nombre: els.regName.value,
-          email: els.regEmail.value,
-          password: els.regPassword.value,
-          confirm: els.regPassword2.value
-        });
-
-        if (!result.ok) {
-          setFormMessage(els.regMessage, result.error);
-          return;
-        }
-
-        els.registerForm.reset();
-        setFormMessage(els.regMessage, '');
-        updateUser();
-        closeDialog(els.authModal);
-        toast('Cuenta creada. Bienvenido/a, ' + result.user.nombre + '.', 'success');
-      });
-    }
-
-    function switchAuthTab(mode) {
-      document.querySelectorAll('[data-auth-tab]').forEach(function (tab) {
-        const active = tab.dataset.authTab === mode;
-        tab.classList.toggle('is-active', active);
-        tab.setAttribute('aria-selected', String(active));
-        tab.tabIndex = active ? 0 : -1;
-      });
-
-      els.loginPanel.hidden = mode !== 'login';
-      els.registerPanel.hidden = mode !== 'register';
-      setFormMessage(els.loginMessage, '');
-      setFormMessage(els.regMessage, '');
-
-      const form = mode === 'login' ? els.loginForm : els.registerForm;
-      const firstInput = form.querySelector('input');
-      if (firstInput) firstInput.focus();
-    }
-
     function setFormMessage(node, message) {
       if (!node) return;
       node.textContent = message || '';
@@ -1013,6 +787,10 @@
 
         setFormMessage(els.checkoutMessage, '');
         const order = Checkout.buildMessage(customer, detail);
+        if (!order.ok) {
+          setFormMessage(els.checkoutMessage, order.error);
+          return;
+        }
         lastMessage = order.text;
         els.waCode.textContent = order.code;
         els.waOpen.href = order.url;
@@ -1045,7 +823,6 @@
         return;
       }
       renderCheckoutSummary(detail);
-      prefillCheckout();
       syncDelivery();
       setFormMessage(els.checkoutMessage, '');
       openDialog(els.checkoutModal);
@@ -1058,11 +835,6 @@
           '<strong>' + Utils.money(line.lineTotal) + '</strong></li>';
       }).join('');
       els.checkoutTotal.textContent = Utils.money(detail.subtotal);
-    }
-
-    function prefillCheckout() {
-      const user = Auth.currentUser();
-      if (user && !els.coNombre.value.trim()) els.coNombre.value = user.nombre;
     }
 
     function copyText(text) {
@@ -1126,7 +898,6 @@
     CONFIG: CONFIG,
     Utils: Utils,
     Catalog: Catalog,
-    Auth: Auth,
     Cart: Cart,
     Checkout: Checkout,
     UI: UI,

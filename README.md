@@ -1,27 +1,32 @@
 # Malako Store
 
 Tienda web estática de electrodomésticos. Catálogo con filtros, carrito persistente,
-registro e inicio de sesión local y checkout por WhatsApp. Sin frameworks, sin
-librerías externas y sin llamadas `fetch`: solo HTML5, CSS3 y JavaScript vanilla.
+checkout como invitado por WhatsApp e ID de compra determinista de 16 dígitos. Sin
+frameworks, sin librerías externas y sin llamadas `fetch`: solo HTML5, CSS3 y
+JavaScript vanilla.
 
 ## Características
 
 - Catálogo renderizado desde un array local con búsqueda, filtro por categoría y orden.
 - Carrito lateral persistente en `localStorage` con control de cantidades y stock.
-- Registro e inicio de sesión guardados únicamente en el navegador.
-- Checkout con datos del cliente, tipo de entrega y método de pago.
-- Mensaje de WhatsApp generado automáticamente con productos, cantidades, total y datos.
-- Panel temporal `admin/` para añadir o eliminar productos y descargar un nuevo `db.js`.
-- Diseño responsivo, accesible con teclado y sin dependencias de red salvo WhatsApp.
+- Checkout como invitado, sin cuentas, registro ni inicio de sesión.
+- Mensaje de WhatsApp con productos, cantidades, total, fecha exacta y datos del cliente.
+- ID de compra numérico de 16 dígitos que puede recalcularse con los datos del pedido.
+- Panel temporal `admin/` para editar el catálogo, descargar un nuevo `db.js` y verificar IDs.
+- Aviso pequeño “Modo admin activado” cuando la carpeta `admin/` está presente.
+- Diseño responsivo, accesible con teclado y sin dependencias externas; solo usa
+  WhatsApp al finalizar y un sondeo local para el aviso de admin.
 
 ## Estructura
 
 ```text
 .
-├── index.html          Catálogo, carrito y modales
+├── index.html          Catálogo, carrito y modales de checkout
 ├── style.css           Estilos de la tienda
 ├── db.js               Productos (const PRODUCTOS + window.PRODUCTOS)
-├── app.js              Lógica de catálogo, auth, carrito y checkout
+├── order-id.js         Generador y verificador compartido del ID de compra
+├── admin-warning.js    Detector y cierre del aviso de modo admin
+├── app.js              Lógica de catálogo, carrito y checkout
 ├── favicon.svg
 ├── .nojekyll
 ├── README.md
@@ -29,8 +34,9 @@ librerías externas y sin llamadas `fetch`: solo HTML5, CSS3 y JavaScript vanill
 ├── PLAN.md             Plan de implementación
 ├── assets/img/         producto1.jpg … producto8.jpg
 └── admin/
-    ├── index.html      Panel temporal
-    └── admin.js        Lógica del panel
+    ├── index.html      Panel temporal y verificador
+    ├── admin.js        Lógica del panel
+    └── admin-mode.js   Marcador que activa el aviso en la tienda
 ```
 
 ## Probar en local
@@ -74,6 +80,9 @@ CURRENCY: 'USD',
 LOCALE: 'en-US'
 ```
 
+La moneda no cambia el algoritmo del ID: el importe siempre se guarda internamente
+en céntimos.
+
 ### Productos
 
 Cada producto de `db.js` tiene esta forma:
@@ -105,7 +114,7 @@ uniformes. Si una imagen falta, se muestra un marcador de “Imagen no disponibl
 1. El cliente agrega productos y abre el carrito.
 2. Pulsa **Finalizar compra** y completa nombre, teléfono, entrega, dirección,
    método de pago y notas.
-3. La tienda arma un resumen, calcula el total y abre:
+3. La tienda calcula el ID de compra, arma el resumen y abre:
 
 ```text
 https://wa.me/<WHATSAPP_NUMBER>?text=<mensaje%20codificado>
@@ -118,30 +127,90 @@ No hay pasarela de pago ni procesamiento de tarjetas. El carrito se vacía despu
 de generar el pedido y se muestra un modal con el enlace de respaldo y la opción
 de copiar el resumen.
 
-## Cuentas y datos locales
+El mensaje incluye una línea como esta:
+
+```text
+*Fecha:* 01/11/2026 15:30:00 (America/Lima)
+```
+
+Conserva ese mensaje: la fecha y hora exactas son necesarias para recalcular el ID.
+
+## ID de compra
+
+El ID tiene **16 dígitos** y no es aleatorio:
+
+```text
+0003346156707567
+└──────┘└──────┘
+importe  cliente
+```
+
+- **Importe (8 dígitos):** céntimos del pedido ofuscados con `XOR 0xA5A5`. Admite
+  desde `S/ 0.01` hasta `S/ 999,999.99`.
+- **Cliente (8 dígitos):** FNV-1a de 64 bits sobre
+  `NOMBRE|TELEFONO|FECHA_HORA|CENTIMOS`, reducido a 8 dígitos.
+- **Fecha/hora:** zona `America/Lima`, con segundos, en formato canónico
+  `YYYY-MM-DDTHH:mm:ss`.
+- **Normalización:** nombre en mayúsculas, sin tildes y con espacios simples;
+  teléfono solo con dígitos.
+
+Ejemplo verificable:
+
+| Dato | Valor |
+|---|---|
+| Nombre | `Omar Castillo` |
+| Teléfono | `987654321` |
+| Fecha y hora | `01/11/2026 15:30:00` America/Lima |
+| Monto | `S/ 100.00` |
+| Entrada del hash | `OMAR CASTILLO|987654321|2026-11-01T15:30:00-05:00|10000` |
+| ID | `0003346156707567` |
+
+El importe puede recuperarse del ID. El nombre y el teléfono no se pueden
+reconstruir desde el ID: para verificarlo hay que conocer los datos originales.
+
+Sin base de datos no hay búsqueda de pedidos ni unicidad matemática garantizada.
+Dos pedidos con el mismo nombre, teléfono, monto y segundo exacto producen el mismo
+ID. El ID es una referencia de compra, no una prueba de pago ni un mecanismo de
+seguridad.
+
+## Datos locales
 
 Claves utilizadas en `localStorage`:
 
 | Clave | Contenido |
 |---|---|
-| `malako_users` | Cuentas registradas |
-| `malako_session` | Sesión activa |
 | `malako_cart` | Carrito actual |
 | `malako_admin_products` | Borrador del panel administrativo |
 
-Para reiniciar la tienda en un navegador, abre DevTools → Application →
-Local Storage y elimina esas claves, o ejecuta:
+El cierre del aviso de admin se guarda en `sessionStorage` bajo
+`malako_admin_notice_dismissed` y dura solo la pestaña actual.
+
+Las claves antiguas `malako_users` y `malako_session` ya no se usan. Puedes
+eliminarlas manualmente desde DevTools → Application → Local Storage.
+
+Para reiniciar la tienda en un navegador:
 
 ```js
-localStorage.removeItem('malako_users');
-localStorage.removeItem('malako_session');
 localStorage.removeItem('malako_cart');
 localStorage.removeItem('malako_admin_products');
+localStorage.removeItem('malako_users');
+localStorage.removeItem('malako_session');
+sessionStorage.removeItem('malako_admin_notice_dismissed');
 ```
 
-La autenticación es **solo demostrativa**: las contraseñas se ofuscan con un hash
-no criptográfico y cualquiera con acceso al navegador puede leer o modificar los
-datos. No uses contraseñas reales ni datos sensibles.
+## Aviso de modo admin
+
+Mientras exista `admin/admin-mode.js`, la tienda muestra una banda pequeña debajo
+del header con el texto **“Modo admin activado”**. El aviso no menciona la carpeta
+ni enlaza al panel.
+
+- Se puede cerrar con el botón de la derecha.
+- El cierre se recuerda solo en la pestaña actual (`sessionStorage`).
+- Al abrir una pestaña o sesión nueva, vuelve a aparecer si `admin/` sigue presente.
+- Al eliminar la carpeta `admin/`, el aviso deja de mostrarse.
+
+El marcador `admin/admin-mode.js` es necesario porque un sitio estático no puede
+consultar directamente si existe una carpeta.
 
 ## Panel administrativo
 
@@ -151,11 +220,16 @@ datos. No uses contraseñas reales ni datos sensibles.
 4. Reemplaza el `db.js` de la raíz con el archivo descargado.
 5. Recarga la tienda.
 
+El panel también incluye **Verificar ID de compra**. Introduce nombre, teléfono,
+fecha, hora exacta y monto para recalcular el ID. Si pegas el ID del pedido, el
+panel indica si coincide. El verificador no guarda datos ni busca pedidos.
+
 El panel no escribe archivos por sí solo: la descarga es manual por seguridad y
 porque un sitio estático no puede modificar el servidor.
 
-**Importante:** elimina la carpeta `admin/` antes de publicar el sitio. GitHub
-Pages hace público todo el contenido del repositorio, incluido el panel.
+**Importante:** elimina la carpeta `admin/` antes de publicar el sitio. No tiene
+login ni enlace desde la tienda, pero GitHub Pages hace público todo el contenido
+del repositorio, incluido el panel.
 
 ## Publicar en GitHub Pages
 
@@ -180,6 +254,13 @@ Revisa también que `PLAN.md` no exponga información que no quieras publicar.
 
 - **Los productos no aparecen:** abre la consola y verifica que `db.js` se cargue
   antes que `app.js` y que `PRODUCTOS` sea un array válido.
+- **No aparece “Modo admin activado”:** confirma que existe `admin/admin-mode.js`
+  y que `admin-warning.js` se carga antes que `app.js`. Si cerraste el aviso en esa
+  pestaña, se recordará hasta cerrarla.
+- **El ID no se genera:** confirma que `order-id.js` se carga antes de `app.js` y
+  que el monto no supera `S/ 999,999.99`.
+- **Un ID no coincide:** revisa nombre, teléfono, fecha, hora con segundos y monto.
+  Una diferencia de un segundo o de un céntimo cambia el resultado.
 - **WhatsApp no abre:** revisa que el número tenga código de país y solo dígitos.
   Usa el botón del modal de respaldo o copia el resumen.
 - **El checkout no valida:** el teléfono admite números, espacios, guiones y
@@ -192,4 +273,4 @@ Revisa también que `PLAN.md` no exponga información que no quieras publicar.
 ## Documentación técnica
 
 Consulta [DOCS.md](DOCS.md) para arquitectura, modelo de datos, API interna,
-recetas de ampliación, roadmap, convenciones y checklist de QA.
+algoritmo del ID, recetas de ampliación, roadmap, convenciones y checklist de QA.

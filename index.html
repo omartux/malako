@@ -39,21 +39,6 @@
       </form>
 
       <div class="header-actions">
-        <div class="user-area" id="user-area">
-          <button class="icon-btn" id="user-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Iniciar sesión o registrarse">
-            <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
-              <circle cx="12" cy="8.5" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"></circle>
-              <path d="M4.8 20c.8-3.4 3.6-5.4 7.2-5.4S18.4 16.6 19.2 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
-            </svg>
-            <span class="header-label" id="user-label">Ingresar</span>
-          </button>
-          <div class="user-menu" id="user-menu" hidden>
-            <p class="user-menu-name" id="user-menu-name"></p>
-            <p class="user-menu-email" id="user-menu-email"></p>
-            <button class="btn btn-ghost btn-sm btn-block" id="logout-btn" type="button">Cerrar sesión</button>
-          </div>
-        </div>
-
         <button class="icon-btn cart-btn" id="cart-btn" type="button" aria-controls="cart-drawer" aria-expanded="false" aria-label="Abrir carrito vacío">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
             <path d="M3.5 5h2.2l1.9 10.1a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.3L21 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -66,6 +51,18 @@
       </div>
     </div>
   </header>
+
+  <div class="admin-notice" id="admin-mode-notice" role="status" aria-live="polite" hidden>
+    <div class="container admin-notice-inner">
+      <span class="admin-notice-dot" aria-hidden="true"></span>
+      <span>Modo admin activado</span>
+      <button class="admin-notice-close" id="admin-mode-close" type="button" aria-label="Cerrar aviso de modo administrador">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
 
   <main>
     <section class="hero">
@@ -269,65 +266,6 @@
     </div>
   </aside>
 
-  <div class="modal" id="auth-modal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-      <button class="modal-close" id="auth-close" type="button" aria-label="Cerrar">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
-        </svg>
-      </button>
-      <h2 class="modal-title" id="auth-title">Tu cuenta</h2>
-      <p class="modal-subtitle">Ingresa para agilizar tus compras o crea una cuenta nueva. Los datos se guardan solo en este navegador.</p>
-
-      <div class="auth-tabs" role="tablist" aria-label="Acceso a la cuenta">
-        <button class="auth-tab is-active" id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="login-panel" data-auth-tab="login">Iniciar sesión</button>
-        <button class="auth-tab" id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="register-panel" data-auth-tab="register" tabindex="-1">Crear cuenta</button>
-      </div>
-
-      <div class="auth-panel" id="login-panel" role="tabpanel" aria-labelledby="tab-login">
-        <form class="form" id="login-form" novalidate>
-          <div class="field">
-            <label for="login-email">Correo electrónico</label>
-            <input id="login-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required data-autofocus>
-          </div>
-          <div class="field">
-            <label for="login-password">Contraseña</label>
-            <input id="login-password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
-          </div>
-          <p class="form-message" id="login-message" role="status"></p>
-          <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
-        </form>
-      </div>
-
-      <div class="auth-panel" id="register-panel" role="tabpanel" aria-labelledby="tab-register" hidden>
-        <form class="form" id="register-form" novalidate>
-          <div class="field">
-            <label for="reg-name">Nombre completo</label>
-            <input id="reg-name" type="text" autocomplete="name" placeholder="María López" required minlength="3">
-          </div>
-          <div class="field">
-            <label for="reg-email">Correo electrónico</label>
-            <input id="reg-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="reg-password">Contraseña</label>
-              <input id="reg-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required minlength="6">
-            </div>
-            <div class="field">
-              <label for="reg-password2">Repetir contraseña</label>
-              <input id="reg-password2" type="password" autocomplete="new-password" placeholder="Repite la contraseña" required minlength="6">
-            </div>
-          </div>
-          <p class="form-message" id="reg-message" role="status"></p>
-          <button class="btn btn-primary btn-block" type="submit">Crear cuenta</button>
-        </form>
-      </div>
-
-      <p class="modal-footnote">Cuenta de demostración: no uses contraseñas reales.</p>
-    </div>
-  </div>
-
   <div class="modal" id="checkout-modal" aria-hidden="true">
     <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
       <button class="modal-close" id="checkout-close" type="button" aria-label="Cerrar">
@@ -427,6 +365,8 @@
 
   <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
+  <script src="order-id.js" defer></script>
+  <script src="admin-warning.js" defer></script>
   <script src="db.js" defer></script>
   <script src="app.js" defer></script>
 </body>

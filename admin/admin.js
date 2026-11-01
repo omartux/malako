@@ -51,7 +51,9 @@
       'product-form', 'nombre', 'precio', 'stock', 'categoria', 'categorias',
       'descripcion', 'imagen', 'destacado', 'preview-wrap', 'preview', 'preview-name',
       'form-message', 'product-rows', 'catalog-stats', 'table-empty',
-      'download-btn', 'reset-btn', 'draft-note'
+      'download-btn', 'reset-btn', 'draft-note', 'verify-form', 'verify-nombre',
+      'verify-telefono', 'verify-fecha', 'verify-hora', 'verify-monto', 'verify-id',
+      'verify-message', 'verify-result', 'verify-id-output', 'verify-meta', 'verify-status'
     ];
     ids.forEach(function (id) {
       els[id] = document.getElementById(id);
@@ -115,6 +117,88 @@
     }
   }
 
+  function setVerifierMessage(text, type) {
+    els['verify-message'].textContent = text || '';
+    els['verify-message'].classList.toggle('is-success', type === 'success');
+  }
+
+  function clearVerifierResult() {
+    els['verify-result'].hidden = true;
+    els['verify-id-output'].textContent = '';
+    els['verify-meta'].textContent = '';
+    els['verify-status'].textContent = '';
+    els['verify-status'].classList.remove('is-success', 'is-error');
+    setVerifierMessage('');
+  }
+
+  function handleVerifierSubmit(event) {
+    event.preventDefault();
+    setVerifierMessage('');
+
+    const form = els['verify-form'];
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const orderId = window.MalakoOrderId;
+    if (!orderId) {
+      setVerifierMessage('No se pudo cargar order-id.js.', 'error');
+      return;
+    }
+
+    const canonical = orderId.canonicalFromInputs(els['verify-fecha'].value, els['verify-hora'].value);
+    if (!canonical) {
+      setVerifierMessage('Ingresa una fecha y una hora válidas, incluidos los segundos.', 'error');
+      els['verify-hora'].focus();
+      return;
+    }
+
+    const result = orderId.build({
+      nombre: els['verify-nombre'].value,
+      telefono: els['verify-telefono'].value,
+      monto: els['verify-monto'].value,
+      canonical: canonical
+    });
+
+    if (!result.ok) {
+      setVerifierMessage(result.error, 'error');
+      return;
+    }
+
+    els['verify-result'].hidden = false;
+    els['verify-id-output'].textContent = result.id;
+    els['verify-meta'].textContent = 'Importe: ' + money(result.cents / 100) +
+      ' · Token importe: ' + result.amountToken +
+      ' · Token cliente: ' + result.customerToken +
+      ' · Fecha: ' + result.display + ' (America/Lima)';
+
+    const entered = String(els['verify-id'].value || '').replace(/\D/g, '');
+    const status = els['verify-status'];
+    status.classList.remove('is-success', 'is-error');
+
+    if (!entered) {
+      status.textContent = 'ID calculado. Compáralo manualmente con el ID del pedido.';
+    } else if (entered.length !== orderId.ID_LENGTH) {
+      status.textContent = 'El ID ingresado debe tener ' + orderId.ID_LENGTH + ' dígitos.';
+      status.classList.add('is-error');
+    } else if (entered === result.id) {
+      status.textContent = 'Coincide con el ID ingresado.';
+      status.classList.add('is-success');
+    } else {
+      status.textContent = 'No coincide. Revisa nombre, teléfono, fecha/hora o monto.';
+      status.classList.add('is-error');
+    }
+  }
+
+  function bindVerifier() {
+    if (!els['verify-form']) return;
+    els['verify-form'].addEventListener('submit', handleVerifierSubmit);
+    els['verify-form'].addEventListener('reset', function () {
+      window.setTimeout(clearVerifierResult, 0);
+    });
+  }
+
   function renderAll() {
     renderStats();
     renderCategories();
@@ -176,6 +260,13 @@
   function handlePreviewError() {
     els.preview.removeAttribute('src');
     els['preview-name'].textContent = 'Imagen no encontrada: ' + els.imagen.value.trim();
+  }
+
+  function resetImagePreview() {
+    els.imagen.value = nextImagePath();
+    els['preview-wrap'].hidden = true;
+    els.preview.removeAttribute('src');
+    els['preview-name'].textContent = '';
   }
 
   function handleTableImageError(event) {
@@ -248,8 +339,7 @@
     renderAll();
 
     els['product-form'].reset();
-    els.imagen.value = nextImagePath();
-    updatePreview();
+    resetImagePreview();
     els.nombre.focus();
     setMessage('Producto agregado. Descarga db.js para aplicar los cambios.', 'success');
   }
@@ -314,8 +404,7 @@
     }
     els['draft-note'].hidden = true;
     renderAll();
-    els.imagen.value = nextImagePath();
-    updatePreview();
+    resetImagePreview();
     setMessage('Catálogo restablecido desde db.js.', 'success');
   }
 
@@ -327,9 +416,7 @@
 
     els['draft-note'].hidden = !draftRestored;
     renderAll();
-
-    els.imagen.value = nextImagePath();
-    updatePreview();
+    resetImagePreview();
 
     els['product-form'].addEventListener('submit', handleSubmit);
     els.imagen.addEventListener('input', updatePreview);
@@ -341,6 +428,7 @@
     els['product-rows'].addEventListener('error', handleTableImageError, true);
     els['download-btn'].addEventListener('click', downloadDatabase);
     els['reset-btn'].addEventListener('click', resetCatalog);
+    bindVerifier();
 
     if (!ORIGINAL.length) {
       setMessage('No se pudo leer ../db.js. Puedes crear el catálogo desde cero.', 'error');

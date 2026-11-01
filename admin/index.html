@@ -267,6 +267,75 @@
       color: var(--muted);
     }
 
+    .verifier-panel {
+      margin-top: 24px;
+    }
+
+    .verifier-fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .verifier-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .verifier-result {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+    }
+
+    .verifier-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .verifier-id {
+      margin-top: 4px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      word-break: break-all;
+    }
+
+    .verifier-meta {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      word-break: break-word;
+    }
+
+    .verifier-status {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .verifier-status.is-success {
+      color: var(--success);
+    }
+
+    .verifier-status.is-error {
+      color: var(--danger);
+    }
+
+    .verifier-note {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
     .admin-footer {
       padding: 24px 0;
       border-top: 1px solid var(--line);
@@ -287,6 +356,10 @@
       .admin-grid {
         grid-template-columns: 1fr;
       }
+
+      .verifier-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 720px) {
@@ -298,6 +371,10 @@
         grid-column: 1 / -1;
         grid-row: 2;
         justify-self: start;
+      }
+
+      .verifier-fields {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -323,7 +400,7 @@
     <section class="admin-hero">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Herramienta local</p>
       <h1>Editor de catálogo</h1>
-      <p>Añade o elimina productos y descarga el nuevo <code>db.js</code> para reemplazar el archivo de la raíz. Esta carpeta es solo para uso local y debe eliminarse antes de publicar el repositorio.</p>
+      <p>Añade o elimina productos, descarga el nuevo <code>db.js</code> y verifica IDs de compra desde los datos del cliente. Esta carpeta es solo para uso local y debe eliminarse antes de publicar el repositorio.</p>
       <ol class="admin-steps">
         <li>Edita el catálogo</li>
         <li>Descarga <code>db.js</code></li>
@@ -423,6 +500,60 @@
         <p class="admin-note">Los cambios se guardan como borrador en este navegador. Descarga <code>db.js</code> y reemplaza el archivo de la raíz para aplicarlos de forma permanente.</p>
       </section>
     </div>
+
+    <section class="panel verifier-panel" aria-labelledby="verifier-title">
+      <div class="panel-head">
+        <h2 id="verifier-title">Verificar ID de compra</h2>
+        <p>Recalcula el ID desde los datos del cliente. No guarda información en el navegador.</p>
+      </div>
+
+      <form class="form" id="verify-form" novalidate>
+        <div class="verifier-fields">
+          <div class="field">
+            <label for="verify-nombre">Nombre completo *</label>
+            <input id="verify-nombre" type="text" autocomplete="off" placeholder="Omar Castillo" required minlength="3">
+          </div>
+          <div class="field">
+            <label for="verify-telefono">Teléfono *</label>
+            <input id="verify-telefono" type="tel" inputmode="tel" autocomplete="off" placeholder="987654321" required minlength="6" maxlength="20">
+          </div>
+          <div class="field">
+            <label for="verify-monto">Monto (S/) *</label>
+            <input id="verify-monto" type="number" inputmode="decimal" step="0.01" min="0.01" max="999999.99" placeholder="100.00" required>
+          </div>
+          <div class="field">
+            <label for="verify-fecha">Fecha *</label>
+            <input id="verify-fecha" type="date" required>
+          </div>
+          <div class="field">
+            <label for="verify-hora">Hora exacta *</label>
+            <input id="verify-hora" type="time" step="1" required>
+            <p class="field-hint">Incluye los segundos que aparecen en el mensaje de WhatsApp.</p>
+          </div>
+          <div class="field">
+            <label for="verify-id">ID a comparar</label>
+            <input id="verify-id" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="0003346156707567">
+            <p class="field-hint">Opcional. Se ignoran espacios.</p>
+          </div>
+        </div>
+
+        <div class="verifier-actions">
+          <button class="btn btn-primary" type="submit">Calcular ID</button>
+          <button class="btn btn-ghost" type="reset">Limpiar</button>
+        </div>
+
+        <p class="form-message" id="verify-message" role="status"></p>
+
+        <div class="verifier-result" id="verify-result" hidden>
+          <p class="verifier-label">ID calculado</p>
+          <p class="verifier-id" id="verify-id-output"></p>
+          <p class="verifier-meta" id="verify-meta"></p>
+          <p class="verifier-status" id="verify-status"></p>
+        </div>
+
+        <p class="verifier-note">Sin base de datos no se pueden buscar pedidos: solo se recalcula el ID desde los datos. El monto se decodifica del primer bloque.</p>
+      </form>
+    </section>
   </main>
 
   <footer class="admin-footer">
@@ -432,6 +563,7 @@
     </div>
   </footer>
 
+  <script src="../order-id.js" defer></script>
   <script src="../db.js" defer></script>
   <script src="admin.js" defer></script>
 </body>
