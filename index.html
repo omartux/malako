@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16181d">
+  <meta name="description" content="Malako Store: electrodomésticos para tu hogar. Arma tu pedido y confirma por WhatsApp con Yape, Plin, transferencia o contra entrega.">
+  <title>Malako Store | Electrodomésticos</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./" aria-label="Malako Store, ir al inicio">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="34" height="34">
+            <rect width="64" height="64" rx="17" fill="currentColor"></rect>
+            <path d="M17 45V22l15 13 15-13v23" fill="none" stroke="#e4572e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <span class="brand-text"><strong>Malako</strong><small>Store</small></span>
+      </a>
+
+      <form class="search" id="search-form" role="search">
+        <label class="sr-only" for="search-input">Buscar productos</label>
+        <svg class="search-icon" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+          <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+        <input id="search-input" type="search" placeholder="Buscar refrigeradora, cocina, TV..." autocomplete="off">
+        <button class="search-submit" type="submit" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </form>
+
+      <div class="header-actions">
+        <div class="user-area" id="user-area">
+          <button class="icon-btn" id="user-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Iniciar sesión o registrarse">
+            <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+              <circle cx="12" cy="8.5" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"></circle>
+              <path d="M4.8 20c.8-3.4 3.6-5.4 7.2-5.4S18.4 16.6 19.2 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+            </svg>
+            <span class="header-label" id="user-label">Ingresar</span>
+          </button>
+          <div class="user-menu" id="user-menu" hidden>
+            <p class="user-menu-name" id="user-menu-name"></p>
+            <p class="user-menu-email" id="user-menu-email"></p>
+            <button class="btn btn-ghost btn-sm btn-block" id="logout-btn" type="button">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <button class="icon-btn cart-btn" id="cart-btn" type="button" aria-controls="cart-drawer" aria-expanded="false" aria-label="Abrir carrito vacío">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M3.5 5h2.2l1.9 10.1a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.3L21 8H7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle cx="10" cy="20" r="1.4" fill="currentColor"></circle>
+            <circle cx="18" cy="20" r="1.4" fill="currentColor"></circle>
+          </svg>
+          <span class="header-label">Carrito</span>
+          <span class="cart-count" id="cart-count" hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Electrodomésticos con entrega coordinada</p>
+          <h1>Tu hogar, <span class="accent-text">más simple</span> y mejor equipado.</h1>
+          <p class="hero-text">Elige tus productos, arma tu carrito y confirma el pedido por WhatsApp. Coordina el pago con Yape, Plin, transferencia o contra entrega.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="#catalogo">Ver catálogo</a>
+            <a class="btn btn-ghost btn-lg" href="#beneficios">Cómo comprar</a>
+          </div>
+          <ul class="hero-perks">
+            <li>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              Envío a coordinar
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              Garantía 12 meses
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              Atención por WhatsApp
+            </li>
+          </ul>
+        </div>
+        <div class="hero-media" aria-hidden="true">
+          <div class="hero-card hero-card-main">
+            <img src="assets/img/producto1.jpg" alt="" width="800" height="600" data-fallback>
+          </div>
+          <div class="hero-card hero-card-small">
+            <img src="assets/img/producto7.jpg" alt="" width="800" height="600" data-fallback>
+          </div>
+          <div class="hero-badge"><strong>+8</strong><span>productos</span></div>
+          <div class="hero-chip">
+            <span class="hero-chip-dot"></span>
+            Pedidos por WhatsApp
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog section" id="catalogo">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Catálogo</p>
+            <h2>Nuestros productos</h2>
+          </div>
+          <p class="results-count" id="results-count" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="catalog-toolbar">
+          <div class="chips" id="category-filters" role="group" aria-label="Filtrar por categoría"></div>
+          <label class="sort-control" for="sort-select">
+            <span>Ordenar</span>
+            <select id="sort-select">
+              <option value="destacado">Destacados</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+              <option value="nombre">Nombre A-Z</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="product-grid" id="product-grid" aria-busy="true"></div>
+
+        <div class="empty-state" id="empty-catalog" hidden>
+          <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+            <path d="M16 16l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+          <h3>No encontramos productos</h3>
+          <p>Prueba con otra búsqueda o cambia de categoría.</p>
+          <button class="btn btn-ghost" type="button" id="clear-filters">Limpiar filtros</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section benefits" id="beneficios">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Así de fácil</p>
+            <h2>Compra en tres pasos</h2>
+          </div>
+        </div>
+        <div class="benefit-grid">
+          <article class="benefit-card">
+            <span class="benefit-number">01</span>
+            <h3>Elige y agrega</h3>
+            <p>Explora el catálogo, filtra por categoría y suma tus electrodomésticos al carrito.</p>
+          </article>
+          <article class="benefit-card">
+            <span class="benefit-number">02</span>
+            <h3>Confirma por WhatsApp</h3>
+            <p>Completa tus datos, elige el método de pago y envía el resumen prellenado a la tienda.</p>
+          </article>
+          <article class="benefit-card">
+            <span class="benefit-number">03</span>
+            <h3>Coordina la entrega</h3>
+            <p>Acuerda el envío, el pago y la disponibilidad directamente con un asesor por chat.</p>
+          </article>
+        </div>
+        <div class="payment-strip">
+          <p>Aceptamos</p>
+          <ul>
+            <li>Yape</li>
+            <li>Plin</li>
+            <li>Transferencia</li>
+            <li>Contra entrega</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="brand brand-footer" href="./" aria-label="Malako Store, ir al inicio">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="32" height="32">
+              <rect width="64" height="64" rx="17" fill="currentColor"></rect>
+              <path d="M17 45V22l15 13 15-13v23" fill="none" stroke="#e4572e" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </span>
+          <span class="brand-text"><strong>Malako</strong><small>Store</small></span>
+        </a>
+        <p>Electrodomésticos seleccionados para hacer tu día a día más simple.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Tienda</h3>
+        <ul>
+          <li><a href="#catalogo">Catálogo</a></li>
+          <li><a href="#beneficios">Cómo comprar</a></li>
+          <li><a href="#beneficios">Métodos de pago</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Contacto</h3>
+        <ul>
+          <li><a id="wa-footer" href="#" target="_blank" rel="noopener noreferrer">Escríbenos por WhatsApp</a></li>
+          <li><span>Lun a sáb, 9:00 a 19:00</span></li>
+          <li><span>Lima, Perú</span></li>
+        </ul>
+      </div>
+      <div class="footer-col footer-note">
+        <h3>Importante</h3>
+        <p>Esta es una tienda de demostración. No se procesan pagos en línea: el pedido, el pago y la entrega se coordinan por WhatsApp.</p>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© <span id="current-year">2026</span> Malako Store. Todos los derechos reservados.</p>
+      <p>Hecho con HTML, CSS y JavaScript vanilla.</p>
+    </div>
+  </footer>
+
+  <a class="whatsapp-fab" id="wa-fab" href="#" target="_blank" rel="noopener noreferrer" aria-label="Escribir a Malako Store por WhatsApp">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+      <path d="M12 3.5a8.5 8.5 0 0 0-7.2 12.9L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+      <path d="M8.8 8.1c.2-.5.5-.6.8-.6h.5c.2 0 .4 0 .5.4l.7 1.6c.1.3 0 .5-.2.7l-.5.5c-.2.2-.2.4-.1.6.5.9 1.3 1.7 2.3 2.2.2.1.4.1.6-.1l.5-.5c.2-.2.4-.3.7-.2l1.6.7c.3.1.4.3.4.5 0 .5-.2 1.3-.6 1.6-.4.4-1.2.7-2.4.4-1.6-.4-3.2-1.4-4.4-2.9-1-1.2-1.7-2.7-1.6-3.8 0-.5.1-.9.2-1.1z" fill="currentColor"></path>
+    </svg>
+  </a>
+
+  <div class="overlay" id="cart-overlay" aria-hidden="true"></div>
+
+  <aside class="drawer" id="cart-drawer" aria-hidden="true" aria-labelledby="cart-title">
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <header class="drawer-head">
+        <div>
+          <p class="eyebrow">Tu compra</p>
+          <h2 id="cart-title">Carrito</h2>
+        </div>
+        <button class="icon-btn" id="cart-close" type="button" aria-label="Cerrar carrito">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </header>
+      <div class="drawer-body">
+        <ul class="cart-items" id="cart-items"></ul>
+        <div class="cart-empty" id="cart-empty" hidden>
+          <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">
+            <path d="M3.5 5h2.2l1.9 10.1a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.3L21 8H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle cx="10" cy="20" r="1.3" fill="currentColor"></circle>
+            <circle cx="18" cy="20" r="1.3" fill="currentColor"></circle>
+          </svg>
+          <h3>Tu carrito está vacío</h3>
+          <p>Agrega productos del catálogo para comenzar tu pedido.</p>
+          <button class="btn btn-ghost" id="cart-empty-cta" type="button">Explorar catálogo</button>
+        </div>
+      </div>
+      <footer class="drawer-foot">
+        <div class="total-row"><span>Subtotal</span><strong id="cart-subtotal">S/ 0.00</strong></div>
+        <p class="helper">El envío se coordina por WhatsApp según tu distrito.</p>
+        <button class="btn btn-primary btn-block" id="cart-checkout" type="button" disabled>Finalizar compra</button>
+        <a class="whatsapp-note" id="cart-wa-link" href="#" target="_blank" rel="noopener noreferrer">¿Tienes dudas? Escríbenos por WhatsApp</a>
+      </footer>
+    </div>
+  </aside>
+
+  <div class="modal" id="auth-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <button class="modal-close" id="auth-close" type="button" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="auth-title">Tu cuenta</h2>
+      <p class="modal-subtitle">Ingresa para agilizar tus compras o crea una cuenta nueva. Los datos se guardan solo en este navegador.</p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Acceso a la cuenta">
+        <button class="auth-tab is-active" id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="login-panel" data-auth-tab="login">Iniciar sesión</button>
+        <button class="auth-tab" id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="register-panel" data-auth-tab="register" tabindex="-1">Crear cuenta</button>
+      </div>
+
+      <div class="auth-panel" id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+        <form class="form" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-email">Correo electrónico</label>
+            <input id="login-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required data-autofocus>
+          </div>
+          <div class="field">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+          </div>
+          <p class="form-message" id="login-message" role="status"></p>
+          <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
+        </form>
+      </div>
+
+      <div class="auth-panel" id="register-panel" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <form class="form" id="register-form" novalidate>
+          <div class="field">
+            <label for="reg-name">Nombre completo</label>
+            <input id="reg-name" type="text" autocomplete="name" placeholder="María López" required minlength="3">
+          </div>
+          <div class="field">
+            <label for="reg-email">Correo electrónico</label>
+            <input id="reg-email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="reg-password">Contraseña</label>
+              <input id="reg-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+            <div class="field">
+              <label for="reg-password2">Repetir contraseña</label>
+              <input id="reg-password2" type="password" autocomplete="new-password" placeholder="Repite la contraseña" required minlength="6">
+            </div>
+          </div>
+          <p class="form-message" id="reg-message" role="status"></p>
+          <button class="btn btn-primary btn-block" type="submit">Crear cuenta</button>
+        </form>
+      </div>
+
+      <p class="modal-footnote">Cuenta de demostración: no uses contraseñas reales.</p>
+    </div>
+  </div>
+
+  <div class="modal" id="checkout-modal" aria-hidden="true">
+    <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <button class="modal-close" id="checkout-close" type="button" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="checkout-title">Finalizar compra</h2>
+      <p class="modal-subtitle">Revisa tu pedido y completa tus datos. Al enviar, abriremos WhatsApp con el resumen prellenado para coordinar el pago y la entrega.</p>
+
+      <div class="checkout-grid">
+        <section class="checkout-summary" aria-labelledby="summary-title">
+          <h3 id="summary-title">Resumen</h3>
+          <ul class="summary-list" id="checkout-summary"></ul>
+          <div class="total-row"><span>Total</span><strong id="checkout-total">S/ 0.00</strong></div>
+          <p class="helper">Precios en soles. El envío se coordina por WhatsApp.</p>
+          <div class="payment-box">
+            <p>Métodos de pago disponibles</p>
+            <ul>
+              <li>Yape</li>
+              <li>Plin</li>
+              <li>Transferencia</li>
+              <li>Contra entrega</li>
+            </ul>
+          </div>
+        </section>
+
+        <form class="form" id="checkout-form" novalidate>
+          <div class="field">
+            <label for="co-nombre">Nombre completo *</label>
+            <input id="co-nombre" type="text" autocomplete="name" placeholder="María López" required minlength="3">
+          </div>
+          <div class="field">
+            <label for="co-telefono">Teléfono / WhatsApp *</label>
+            <input id="co-telefono" type="tel" autocomplete="tel" inputmode="tel" placeholder="987 654 321" required minlength="6" maxlength="20">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="co-entrega">Entrega *</label>
+              <select id="co-entrega" required>
+                <option value="Delivery a domicilio">Delivery a domicilio</option>
+                <option value="Recojo en tienda">Recojo en tienda</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="co-metodo">Método de pago *</label>
+              <select id="co-metodo" required>
+                <option value="Yape">Yape</option>
+                <option value="Plin">Plin</option>
+                <option value="Transferencia bancaria">Transferencia bancaria</option>
+                <option value="Contra entrega">Contra entrega</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" id="co-direccion-field">
+            <label for="co-direccion">Dirección de entrega *</label>
+            <input id="co-direccion" type="text" autocomplete="street-address" placeholder="Av. Ejemplo 123, distrito" required minlength="6">
+          </div>
+          <div class="field">
+            <label for="co-notas">Notas para el pedido <span class="optional">(opcional)</span></label>
+            <textarea id="co-notas" rows="2" maxlength="300" placeholder="Referencias, horario de entrega, etc."></textarea>
+          </div>
+          <p class="form-message" id="checkout-message" role="status"></p>
+          <button class="btn btn-primary btn-block btn-wa" type="submit">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M12 3.5a8.5 8.5 0 0 0-7.2 12.9L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path>
+              <path d="M8.8 8.1c.2-.5.5-.6.8-.6h.5c.2 0 .4 0 .5.4l.7 1.6c.1.3 0 .5-.2.7l-.5.5c-.2.2-.2.4-.1.6.5.9 1.3 1.7 2.3 2.2.2.1.4.1.6-.1l.5-.5c.2-.2.4-.3.7-.2l1.6.7c.3.1.4.3.4.5 0 .5-.2 1.3-.6 1.6-.4.4-1.2.7-2.4.4-1.6-.4-3.2-1.4-4.4-2.9-1-1.2-1.7-2.7-1.6-3.8 0-.5.1-.9.2-1.1z" fill="currentColor"></path>
+            </svg>
+            Enviar pedido por WhatsApp
+          </button>
+          <p class="helper helper-center">Serás redirigido a WhatsApp Web o a la app.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="wa-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="wa-title">
+      <button class="modal-close" id="wa-close" type="button" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <div class="wa-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="34" height="34">
+          <path d="M12 3.5a8.5 8.5 0 0 0-7.2 12.9L3.5 20.5l4.3-1.2A8.5 8.5 0 1 0 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+          <path d="M8.8 8.1c.2-.5.5-.6.8-.6h.5c.2 0 .4 0 .5.4l.7 1.6c.1.3 0 .5-.2.7l-.5.5c-.2.2-.2.4-.1.6.5.9 1.3 1.7 2.3 2.2.2.1.4.1.6-.1l.5-.5c.2-.2.4-.3.7-.2l1.6.7c.3.1.4.3.4.5 0 .5-.2 1.3-.6 1.6-.4.4-1.2.7-2.4.4-1.6-.4-3.2-1.4-4.4-2.9-1-1.2-1.7-2.7-1.6-3.8 0-.5.1-.9.2-1.1z" fill="currentColor"></path>
+        </svg>
+      </div>
+      <h2 class="modal-title" id="wa-title">Pedido listo para enviar</h2>
+      <p class="modal-subtitle">Abrimos WhatsApp con el resumen de tu pedido <strong id="wa-code"></strong>. Si la ventana no se abrió, usa el botón inferior.</p>
+      <a class="btn btn-primary btn-block" id="wa-open" href="#" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
+      <button class="btn btn-ghost btn-block" id="wa-copy" type="button">Copiar resumen del pedido</button>
+      <p class="helper helper-center">Envía el mensaje desde tu WhatsApp para que la tienda reciba el pedido.</p>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="db.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
